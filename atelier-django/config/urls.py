@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import RedirectView
 
 from accounts.views import LocalLoginView, LocalRegisterView
 from catalog.views import CategoryListView, ProductDetailView, ProductListView
@@ -22,6 +23,8 @@ from commerce.views import (
 from mediafiles.views import serve_database_media, using_database_storage
 
 urlpatterns = [
+    # /admin (no slash) → /admin/  (APPEND_SLASH is False for slashless APIs)
+    path("admin", RedirectView.as_view(url="/admin/", permanent=False)),
     path("admin/", admin.site.urls),
     # Auth (Strapi-compatible)
     path("api/auth/local", LocalLoginView.as_view()),
