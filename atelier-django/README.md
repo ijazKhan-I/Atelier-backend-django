@@ -41,6 +41,8 @@ Set these in **Vercel → Atelier-backend-django → Settings → Environment Va
 
 Optional: `ADMIN_NOTIFICATION_EMAIL`, `SMTP_*`.
 
+**Image uploads:** With `DATABASE_URL` (Neon), upload bytes are stored in PostgreSQL (`mediafiles_databasefile`) and served at `/uploads/...`, so admin images work on Vercel.
+
 After setting env vars, redeploy the backend. Run migrations once (local against Neon, or Vercel build/SSH):
 
 ```bash

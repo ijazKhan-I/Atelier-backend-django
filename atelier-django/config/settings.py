@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "catalog",
     "cms",
     "commerce",
+    "mediafiles.apps.MediafilesConfig",
 ]
 
 MIDDLEWARE = [
@@ -121,17 +122,34 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+
+# Media uploads:
+# - DatabaseStorage (Neon/Postgres) when DATABASE_URL is set — durable on Vercel
+# - local ./uploads filesystem for pure SQLite development
+ON_VERCEL = bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV"))
 
 MEDIA_URL = "/uploads/"
 MEDIA_ROOT = BASE_DIR / "uploads"
+
+_WHITENOISE_STATIC = {
+    "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+}
+
+if DATABASE_URL:
+    # Persist image bytes in Neon so admin uploads work on Vercel (no local disk).
+    STORAGES = {
+        "default": {
+            "BACKEND": "mediafiles.storage.DatabaseStorage",
+        },
+        "staticfiles": _WHITENOISE_STATIC,
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": _WHITENOISE_STATIC,
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APPEND_SLASH = False

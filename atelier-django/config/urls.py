@@ -19,6 +19,7 @@ from commerce.views import (
     ShareDriverLocationPublicView,
     TrackOrderView,
 )
+from mediafiles.views import serve_database_media, using_database_storage
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -50,5 +51,10 @@ urlpatterns = [
     path("api/contact-inquiries/submit", ContactInquirySubmitView.as_view()),
 ]
 
-if settings.DEBUG:
+# Neon / DB-backed media must be served in production (DEBUG=False on Vercel).
+if using_database_storage():
+    urlpatterns += [
+        path("uploads/<path:path>", serve_database_media),
+    ]
+elif settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
